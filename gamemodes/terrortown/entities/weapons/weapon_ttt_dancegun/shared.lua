@@ -74,6 +74,15 @@ SWEP.WorldModel = 'models/weapons/w_pist_deagle.mdl'
 SWEP.Weight = 5
 SWEP.Primary.Sound = Sound('Weapon_Deagle.Reaper')
 
+-- register status effect icon
+if CLIENT then
+	hook.Add('Initialize', 'ttt2_dancegun_status_init', function() 
+		STATUS:RegisterStatus('ttt2_dancegun_status', {
+			hud = Material('vgui/ttt/hud_icon_dancegun.png'),
+			type = 'bad'
+		})
+	end)
+end
 
 --- HANDLE WEAPON ACTION ---
 if CLIENT then
@@ -121,6 +130,7 @@ if SERVER then
         ply.dancing = nil
         ply:Freeze(false)
         ply:StopSound(ply.current_song)
+        STATUS:RemoveStatus(ply, 'ttt2_dancegun_status')
 
         net.Start('ttt2_dancegun_start_dance')
         net.WriteEntity(ply)
@@ -138,6 +148,7 @@ if SERVER then
 
         ply:Freeze(true)
         ply:EmitSound(ply.current_song, 80)
+        STATUS:AddStatus(ply, 'ttt2_dancegun_status')
 
         -- freeze player and let him dance
         net.Start('ttt2_dancegun_start_dance')
