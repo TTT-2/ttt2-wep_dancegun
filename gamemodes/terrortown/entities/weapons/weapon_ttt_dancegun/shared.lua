@@ -4,6 +4,7 @@ if SERVER then
     resource.AddFile('sound/scythe.mp3')
 
     resource.AddFile('materials/vgui/ttt/icon_dancegun')
+    resource.AddFile('materials/vgui/ttt/dance_overlay')
     resource.AddFile('materials/vgui/ttt/hud_icon_dancing.png')
 end
 
@@ -89,8 +90,14 @@ if CLIENT then
     net.Receive('ttt2_dancegun_start_dance', function()
         local target = net.ReadEntity()
         local reset = net.ReadBool()
+        local client = LocalPlayer()
 
         if not target or not IsValid(target) then return end
+
+        -- set var if player is dacing
+        if target == client then
+            client.dancing = not reset
+        end
 
         if reset then
             -- stop dance animation
@@ -104,6 +111,12 @@ if CLIENT then
             end
         end
     end)
+
+    hook.Add('RenderScreenspaceEffects', 'ttt2_dancegun_screen_overlay', function()
+		if LocalPlayer().dancing then
+			DrawMaterialOverlay('vgui/ttt/dance_overlay', 0)
+		end
+	end)
 end
 
 if SERVER then
@@ -140,7 +153,7 @@ if SERVER then
         net.Broadcast()
     end
 
-    function StartDancing(ply, attacker)
+    local function StartDancing(ply, attacker)
         if ply.dancing then return end
 
         ply.dancing = CurTime()
