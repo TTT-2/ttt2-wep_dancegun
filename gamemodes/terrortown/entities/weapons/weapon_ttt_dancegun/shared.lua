@@ -300,4 +300,12 @@ if SERVER then
             end
         end
     end)
+
+    hook.Add('PlayerCanPickupWeapon', 'ttt2_dancegun_no_pickup_while_dancing', function(ply, wep)
+        if not ply or not IsValid(ply) then return end
+
+        if ply.dancing then
+            return false
+        end
+    end)
 end
