@@ -292,4 +292,12 @@ if SERVER then
 
         EndDancing(ply)
     end)
+
+    hook.Add('TTTEndRound', 'ttt2_dancegun_end_round', function(ply)
+        for _, p in ipairs(player.GetAll()) do
+            if p.dancing then
+                EndDancing(p)
+            end
+        end
+    end)
 end
