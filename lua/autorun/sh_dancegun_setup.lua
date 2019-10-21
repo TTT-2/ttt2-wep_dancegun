@@ -46,9 +46,6 @@ if SERVER then
             end
         end
 
-        print(tostring(enabled_songs))
-        PrintTable(enabled_songs)
-
         -- no song enabled
         if #enabled_songs == 0 then return end
 

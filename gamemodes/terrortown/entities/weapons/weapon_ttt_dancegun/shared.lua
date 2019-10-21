@@ -4,7 +4,7 @@ if SERVER then
     resource.AddFile('sound/scythe.mp3')
 
     resource.AddFile('materials/vgui/ttt/icon_dancegun')
-    resource.AddFile('materials/vgui/ttt/hud_icon_dancegun.png')
+    resource.AddFile('materials/vgui/ttt/hud_icon_dancing.png')
 end
 
 SWEP.Base = 'weapon_tttbase'
@@ -78,7 +78,7 @@ SWEP.Primary.Sound = Sound('Weapon_Deagle.Reaper')
 if CLIENT then
 	hook.Add('Initialize', 'ttt2_dancegun_status_init', function() 
 		STATUS:RegisterStatus('ttt2_dancegun_status', {
-			hud = Material('vgui/ttt/hud_icon_dancegun.png'),
+			hud = Material('vgui/ttt/hud_icon_dancing.png'),
 			type = 'bad'
 		})
 	end)
@@ -93,8 +93,10 @@ if CLIENT then
         if not target or not IsValid(target) then return end
 
         if reset then
+            -- stop dance animation
             target:AnimResetGestureSlot(GESTURE_SLOT_CUSTOM)
         else
+            -- start dance animation
             if math.random(0, 1) == 0 then
                 target:AnimRestartGesture(GESTURE_SLOT_CUSTOM, ACT_GMOD_GESTURE_TAUNT_ZOMBIE, false)
             else
@@ -138,7 +140,7 @@ if SERVER then
         net.Broadcast()
     end
 
-    local function StartDancing(ply, attacker)
+    function StartDancing(ply, attacker)
         if ply.dancing then return end
 
         ply.dancing = CurTime()
@@ -167,8 +169,17 @@ if SERVER then
             if not ply or not IsValid(ply) then return end
             if not attacker or not IsValid(attacker) then return end
 
-            ply.damage_tick = ply.damage_tick + 1
+            -- create damage
             InstantDamage(ply, tick_damage, attacker, ents.Create('weapon_ttt_dancegun'))
+            
+            -- add dance motion
+            ply:ViewPunch(Angle(
+                (math.random() * 60) - 20,
+                (math.random() * 60) - 20,
+                (math.random() * 40) - 10
+            ))
+
+            ply.damage_tick = ply.damage_tick + 1
 
             if ply.damage_tick == duration then
                 EndDancing(ply)
