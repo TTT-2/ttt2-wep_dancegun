@@ -122,6 +122,52 @@ end
 if SERVER then
     util.AddNetworkString('ttt2_dancegun_start_dance')
 
+    -- this function removes the loadout of a player
+    -- while also storing all information for a later use
+    -- credit: Alf21
+    local function RemoveLoadout(ply)
+        ply.savedDancegunInventoryItems = table.Copy(ply:GetEquipmentItems())
+
+        -- reset inventory
+        ply.savedDancegunInventory = {}
+
+        -- save inventory
+        for _, v in pairs(ply:GetWeapons()) do
+            ply.savedDancegunInventory[#ply.savedDancegunInventory + 1] = {cls = WEPS.GetClass(v), clip1 = v:Clip1(), clip2 = v:Clip2()}
+        end
+
+        ply.savedDancegunInventoryWeapon = WEPS.GetClass(ply:GetActiveWeapon())
+
+        -- take inventory
+        ply:StripWeapons()
+    end
+
+    -- this function returns the loadout of a player
+    -- which was previously stored
+    -- credit: Alf21
+    local function GiveLoadout(ply)
+        if ply.savedDancegunInventory then
+            for _, tbl in ipairs(ply.savedDancegunInventory) do
+                if tbl.cls then
+                    local wep = ply:Give(tbl.cls)
+
+                    if IsValid(wep) then
+                        wep:SetClip1(tbl.clip1 or 0)
+                        wep:SetClip2(tbl.clip2 or 0)
+                    end
+                end
+            end
+        end
+
+        if ply.savedDancegunInventoryWeapon then
+            ply:SelectWeapon(ply.savedDancegunInventoryWeapon)
+        end
+
+        -- reset inventory
+        ply.savedDancegunInventory = nil
+        ply.savedDancegunInventoryItems = nil
+    end
+
     local function InstantDamage(ply, damage, attacker, inflictor)
         local dmg = DamageInfo()
 
@@ -141,16 +187,22 @@ if SERVER then
     local function EndDancing(ply)
         if not ply or not IsValid(ply) then return end
 
-        timer.Stop(ply.dancing_timer)
-        ply.dancing = nil
+        -- unfreeze player
         ply:Freeze(false)
+        ply.dancing = nil
         ply:StopSound(ply.current_song)
         STATUS:RemoveStatus(ply, 'ttt2_dancegun_status')
 
+        -- stop the dance
         net.Start('ttt2_dancegun_start_dance')
         net.WriteEntity(ply)
         net.WriteBool(true)
         net.Broadcast()
+
+        -- give loadout back
+        GiveLoadout(ply)
+
+        timer.Stop(ply.dancing_timer)
     end
 
     local function StartDancing(ply, attacker)
@@ -161,15 +213,19 @@ if SERVER then
         ply.damage_tick = 0
         ply.current_song = DANCEGUN:GetRandomSong()
 
+        -- freeze player
         ply:Freeze(true)
         ply:EmitSound(ply.current_song, 80)
         STATUS:AddStatus(ply, 'ttt2_dancegun_status')
 
-        -- freeze player and let him dance
+        -- let him dance
         net.Start('ttt2_dancegun_start_dance')
         net.WriteEntity(ply)
         net.WriteBool(false)
         net.Broadcast()
+
+        -- save and remove player loadout
+        RemoveLoadout(ply)
 
         -- precalc dancegun parameters based on convars
         local duration = GetConVar('ttt_dancegun_duration'):GetInt()
