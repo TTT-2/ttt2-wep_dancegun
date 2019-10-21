@@ -156,6 +156,11 @@ if SERVER then
         net.WriteBool(false)
         net.Broadcast()
 
+        -- precalc dancegun parameters based on convars
+        local duration = GetConVar('ttt_dancegun_duration'):GetInt()
+        local damage = GetConVar('ttt_dancegun_damage'):GetInt()
+
+        local tick_damage = damage / duration
 
         -- start damage timer
         timer.Create(ply.dancing_timer, 1, 0, function()
@@ -163,9 +168,9 @@ if SERVER then
             if not attacker or not IsValid(attacker) then return end
 
             ply.damage_tick = ply.damage_tick + 1
-            InstantDamage(ply, 3, attacker, ents.Create('weapon_ttt_dancegun'))
+            InstantDamage(ply, tick_damage, attacker, ents.Create('weapon_ttt_dancegun'))
 
-            if ply.damage_tick == 16 then
+            if ply.damage_tick == duration then
                 EndDancing(ply)
             end
         end)

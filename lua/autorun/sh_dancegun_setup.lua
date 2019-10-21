@@ -1,3 +1,8 @@
+-- DANCEGUN CONVARS
+CreateConVar('ttt_dancegun_duration', 20, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
+CreateConVar('ttt_dancegun_damage', 55, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
+
+-- DANCEGUN HANDLING
 DANCEGUN = {}
 DANCEGUN.songs = {}
 
@@ -8,6 +13,9 @@ hook.Add('TTTUlxInitCustomCVar', 'ttt2_dancegun_replicate_convars', function(nam
 
         ULib.replicatedWritableCvar(convar_name, repvar_name, GetConVar(convar_name):GetBool(), true, false, name)
     end
+
+    ULib.replicatedWritableCvar('ttt_dancegun_duration', 'rep_ttt_dancegun_duration', GetConVar('ttt_dancegun_duration'):GetInt(), true, false, name)
+    ULib.replicatedWritableCvar('ttt_dancegun_damage', 'rep_ttt_dancegun_damage', GetConVar('ttt_dancegun_damage'):GetInt(), true, false, name)
 end)
 
 function DANCEGUN:RegisterSong(song_id, song_path)
@@ -52,12 +60,13 @@ end
 -- registering songs
 hook.Add('OnGamemodeLoaded', 'ttt2_dancegun_register_songs', function()
     DANCEGUN:RegisterSong('russian', 'songs/russian.mp3')
-    DANCEGUN:RegisterSong('reaper', 'songs/reaper.mp3')
     DANCEGUN:RegisterSong('dug_dance', 'songs/dug_dance.mp3')
     DANCEGUN:RegisterSong('90s_running', 'songs/90s_running.mp3')
     DANCEGUN:RegisterSong('beverly_hills', 'songs/beverly_hills.mp3')
     DANCEGUN:RegisterSong('hey_yeah', 'songs/hey_yeah.mp3')
     DANCEGUN:RegisterSong('horse', 'songs/horse.mp3')
+    DANCEGUN:RegisterSong('spongebob', 'songs/spongebob.mp3')
+    DANCEGUN:RegisterSong('epic_sax', 'songs/epic_sax.mp3')
 
     -- use this hook to add further songs
     hook.Run('TTT2DanceGunAddSongs')
@@ -68,7 +77,24 @@ if CLIENT then
     hook.Add('TTTUlxModifyAddonSettings', 'ttt2_dancegun_add_to_ulx', function(name)
         local tttrspnl = xlib.makelistlayout{w = 415, h = 318, parent = xgui.null}
 
-        -- Basic Settings 
+        -- Basic Settings
+        local tttrsclp = vgui.Create('DCollapsibleCategory', tttrspnl)
+        tttrsclp:SetSize(390, 50)
+        tttrsclp:SetExpanded(1)
+        tttrsclp:SetLabel('Basic Settings')
+
+        local tttrslst = vgui.Create('DPanelList', tttrsclp)
+        tttrslst:SetPos(5, 25)
+        tttrslst:SetSize(390, 50)
+        tttrslst:SetSpacing(5)
+
+        local tttslid1 = xlib.makeslider{label = 'ttt_dancegun_duration (def. 20)', repconvar = 'rep_ttt_dancegun_duration', min = 0, max = 60, decimal = 0, parent = tttrslst}
+        tttrslst:AddItem(tttslid1)
+
+        local tttslid2 = xlib.makeslider{label = 'ttt_dancegun_damage (def. 55)', repconvar = 'rep_ttt_dancegun_damage', min = 0, max = 150, decimal = 0, parent = tttrslst}
+        tttrslst:AddItem(tttslid2)
+
+        -- Song Settings
         local tttrsclp1 = vgui.Create('DCollapsibleCategory', tttrspnl)
         tttrsclp1:SetSize(390, 20 * #DANCEGUN.songs)
         tttrsclp1:SetExpanded(1)
