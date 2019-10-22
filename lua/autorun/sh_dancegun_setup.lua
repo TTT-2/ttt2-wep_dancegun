@@ -64,6 +64,7 @@ hook.Add('OnGamemodeLoaded', 'ttt2_dancegun_register_songs', function()
     DANCEGUN:RegisterSong('horse', 'songs/horse.mp3')
     DANCEGUN:RegisterSong('spongebob', 'songs/spongebob.mp3')
     DANCEGUN:RegisterSong('epic_sax', 'songs/epic_sax.mp3')
+    DANCEGUN:RegisterSong('number_one', 'songs/number_one.mp3')
 
     -- use this hook to add further songs
     hook.Run('TTT2DanceGunAddSongs')
