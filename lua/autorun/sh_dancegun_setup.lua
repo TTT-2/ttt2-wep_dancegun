@@ -1,6 +1,7 @@
 -- DANCEGUN CONVARS
 CreateConVar('ttt_dancegun_duration', 20, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
 CreateConVar('ttt_dancegun_damage', 55, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
+CreateConVar('ttt_dancegun_ammo', 3, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
 
 -- DANCEGUN HANDLING
 DANCEGUN = {}
@@ -16,6 +17,7 @@ hook.Add('TTTUlxInitCustomCVar', 'ttt2_dancegun_replicate_convars', function(nam
 
     ULib.replicatedWritableCvar('ttt_dancegun_duration', 'rep_ttt_dancegun_duration', GetConVar('ttt_dancegun_duration'):GetInt(), true, false, name)
     ULib.replicatedWritableCvar('ttt_dancegun_damage', 'rep_ttt_dancegun_damage', GetConVar('ttt_dancegun_damage'):GetInt(), true, false, name)
+    ULib.replicatedWritableCvar('ttt_dancegun_ammo', 'rep_ttt_dancegun_ammo', GetConVar('ttt_dancegun_ammo'):GetInt(), true, false, name)
 end)
 
 function DANCEGUN:RegisterSong(song_id, song_path)
@@ -77,13 +79,13 @@ if CLIENT then
 
         -- Basic Settings
         local tttrsclp = vgui.Create('DCollapsibleCategory', tttrspnl)
-        tttrsclp:SetSize(390, 50)
+        tttrsclp:SetSize(390, 75)
         tttrsclp:SetExpanded(1)
         tttrsclp:SetLabel('Basic Settings')
 
         local tttrslst = vgui.Create('DPanelList', tttrsclp)
         tttrslst:SetPos(5, 25)
-        tttrslst:SetSize(390, 50)
+        tttrslst:SetSize(390, 75)
         tttrslst:SetSpacing(5)
 
         local tttslid1 = xlib.makeslider{label = 'ttt_dancegun_duration (def. 20)', repconvar = 'rep_ttt_dancegun_duration', min = 0, max = 60, decimal = 0, parent = tttrslst}
@@ -91,6 +93,9 @@ if CLIENT then
 
         local tttslid2 = xlib.makeslider{label = 'ttt_dancegun_damage (def. 55)', repconvar = 'rep_ttt_dancegun_damage', min = 0, max = 150, decimal = 0, parent = tttrslst}
         tttrslst:AddItem(tttslid2)
+
+        local tttslid3 = xlib.makeslider{label = 'ttt_dancegun_ammo (def. 3)', repconvar = 'rep_ttt_dancegun_ammo', min = 0, max = 10, decimal = 0, parent = tttrslst}
+        tttrslst:AddItem(tttslid3)
 
         -- Song Settings
         local tttrsclp1 = vgui.Create('DCollapsibleCategory', tttrspnl)

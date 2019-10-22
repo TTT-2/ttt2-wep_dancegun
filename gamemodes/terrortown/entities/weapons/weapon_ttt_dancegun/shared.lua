@@ -58,9 +58,8 @@ SWEP.Primary.NumShots = 1
 SWEP.Primary.Damage = 0
 SWEP.Primary.Cone = 0.00001
 SWEP.Primary.Ammo = ''
-SWEP.Primary.ClipSize = 3
-SWEP.Primary.ClipMax = 3
-SWEP.Primary.DefaultClip = 3
+SWEP.Primary.ClipSize = 1
+SWEP.Primary.DefaultClip = 1
 
 -- some other stuff
 SWEP.IsSilent = false
@@ -74,6 +73,15 @@ SWEP.ViewModel = 'models/weapons/cstrike/c_pist_deagle.mdl'
 SWEP.WorldModel = 'models/weapons/w_pist_deagle.mdl'
 SWEP.Weight = 5
 SWEP.Primary.Sound = Sound('Weapon_Deagle.Reaper')
+
+-- modify default weapon clip
+function SWEP:Initialize()
+    local clip = math.max(0, GetConVar('ttt_dancegun_ammo'):GetInt())
+    
+    self:SetClip1(clip)
+
+    self.BaseClass.Initialize(self)
+end
 
 -- register status effect icon
 if CLIENT then
@@ -206,7 +214,7 @@ if SERVER then
         timer.Stop(ply.dancing_timer)
     end
 
-    function StartDancing(ply, attacker)
+    local function StartDancing(ply, attacker)
         if ply.dancing then return end
 
         ply.dancing = true
