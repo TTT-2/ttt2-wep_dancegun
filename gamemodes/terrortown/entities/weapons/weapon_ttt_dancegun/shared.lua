@@ -42,7 +42,7 @@ if CLIENT then
     SWEP.ViewModelFlip = false
 
     SWEP.Category = 'Deagle'
-    SWEP.Icon = 'vgui/ttt/icon_dancegun.vtf'
+    SWEP.Icon = 'vgui/ttt/icon_dancegun'
     SWEP.EquipMenuData = {
         type = 'Weapon',
         name = 'ttt2_weapon_dancegun',
@@ -77,50 +77,46 @@ SWEP.Primary.Sound = Sound('Weapon_Deagle.Reaper')
 
 -- register status effect icon
 if CLIENT then
-	hook.Add('Initialize', 'ttt2_dancegun_status_init', function() 
-		STATUS:RegisterStatus('ttt2_dancegun_status', {
-			hud = Material('vgui/ttt/hud_icon_dancing.png'),
-			type = 'bad'
-		})
-	end)
+    hook.Add('Initialize', 'ttt2_dancegun_status_init', function() 
+        STATUS:RegisterStatus('ttt2_dancegun_status', {
+            hud = Material('vgui/ttt/hud_icon_dancing.png'),
+            type = 'bad'
+        })
+    end)
 end
 
 --- HANDLE WEAPON ACTION ---
 if CLIENT then
-    net.Receive('ttt2_dancegun_start_dance', function()
+    net.Receive('ttt2_dancegun_dance', function()
         local target = net.ReadEntity()
-        local reset = net.ReadBool()
-        local client = LocalPlayer()
 
         if not target or not IsValid(target) then return end
+        
+        target.dancing = net.ReadBool()
 
-        -- set var if player is dacing
-        if target == client then
-            client.dancing = not reset
-        end
-
-        if reset then
-            -- stop dance animation
-            target:AnimResetGestureSlot(GESTURE_SLOT_CUSTOM)
-        else
+        if target.dancing then
             -- start dance animation
             if math.random(0, 1) == 0 then
                 target:AnimRestartGesture(GESTURE_SLOT_CUSTOM, ACT_GMOD_GESTURE_TAUNT_ZOMBIE, false)
             else
                 target:AnimRestartGesture(GESTURE_SLOT_CUSTOM, ACT_GMOD_TAUNT_DANCE, false)
             end
+        else
+            -- stop dance animation
+            target:AnimResetGestureSlot(GESTURE_SLOT_CUSTOM)
         end
     end)
 
+    -- draw a screen overlay
     hook.Add('RenderScreenspaceEffects', 'ttt2_dancegun_screen_overlay', function()
-		if LocalPlayer().dancing then
-			DrawMaterialOverlay('vgui/ttt/dance_overlay', 0)
-		end
-	end)
+        if not LocalPlayer().dancing then return end
+
+        DrawMaterialOverlay('vgui/ttt/dance_overlay', 0)
+    end)
 end
 
 if SERVER then
-    util.AddNetworkString('ttt2_dancegun_start_dance')
+    util.AddNetworkString('ttt2_dancegun_dance')
 
     -- this function removes the loadout of a player
     -- while also storing all information for a later use
@@ -138,7 +134,7 @@ if SERVER then
 
         ply.savedDancegunInventoryWeapon = WEPS.GetClass(ply:GetActiveWeapon())
 
-        -- take inventory
+        -- clear inventory
         ply:StripWeapons()
     end
 
@@ -184,20 +180,25 @@ if SERVER then
         ply:TakeDamageInfo(dmg)
     end
 
+    -- transmit dancing update to all clients
+    local function UpdateDancingOnClients(ply)
+        net.Start('ttt2_dancegun_dance')
+        net.WriteEntity(ply)
+        net.WriteBool(ply.dancing)
+        net.Broadcast()
+    end
+
     local function EndDancing(ply)
         if not ply or not IsValid(ply) then return end
 
         -- unfreeze player
         ply:Freeze(false)
-        ply.dancing = nil
+        ply.dancing = false
         ply:StopSound(ply.current_song)
         STATUS:RemoveStatus(ply, 'ttt2_dancegun_status')
 
-        -- stop the dance
-        net.Start('ttt2_dancegun_start_dance')
-        net.WriteEntity(ply)
-        net.WriteBool(true)
-        net.Broadcast()
+        -- stop the dance - transmit to clients
+        UpdateDancingOnClients(ply)
 
         -- give loadout back
         GiveLoadout(ply)
@@ -205,11 +206,11 @@ if SERVER then
         timer.Stop(ply.dancing_timer)
     end
 
-    local function StartDancing(ply, attacker)
+    function StartDancing(ply, attacker)
         if ply.dancing then return end
 
-        ply.dancing = CurTime()
-        ply.dancing_timer = 'ttt2_dancegun_timer_' .. tostring(ply.dancing)
+        ply.dancing = true
+        ply.dancing_timer = 'ttt2_dancegun_timer_' .. tostring(CurTime())
         ply.damage_tick = 0
         ply.current_song = DANCEGUN:GetRandomSong()
 
@@ -218,11 +219,8 @@ if SERVER then
         ply:EmitSound(ply.current_song, 80)
         STATUS:AddStatus(ply, 'ttt2_dancegun_status')
 
-        -- let him dance
-        net.Start('ttt2_dancegun_start_dance')
-        net.WriteEntity(ply)
-        net.WriteBool(false)
-        net.Broadcast()
+        -- let him dance - transmit to clients
+        UpdateDancingOnClients(ply)
 
         -- save and remove player loadout
         RemoveLoadout(ply)
@@ -293,6 +291,7 @@ if SERVER then
         EndDancing(ply)
     end)
 
+    -- stop dancing on round end
     hook.Add('TTTEndRound', 'ttt2_dancegun_end_round', function(ply)
         for _, p in ipairs(player.GetAll()) do
             if p.dancing then
@@ -301,6 +300,7 @@ if SERVER then
         end
     end)
 
+    -- dancing players should not be able to pick up weapons
     hook.Add('PlayerCanPickupWeapon', 'ttt2_dancegun_no_pickup_while_dancing', function(ply, wep)
         if not ply or not IsValid(ply) then return end
 
