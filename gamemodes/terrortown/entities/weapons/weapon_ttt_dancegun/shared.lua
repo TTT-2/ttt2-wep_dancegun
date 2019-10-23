@@ -1,7 +1,7 @@
 if SERVER then
     AddCSLuaFile()
 
-    resource.AddFile('sound/scythe.mp3')
+    resource.AddFile('sound/scythe.wav')
 
     resource.AddFile('materials/vgui/ttt/icon_dancegun')
     resource.AddFile('materials/vgui/ttt/dance_overlay')
@@ -30,7 +30,7 @@ sound.Add({
     channel = CHAN_STATIC,
     volume = 1.0,
     level = 130,
-    sound = 'scythe.mp3'
+    sound = 'scythe.wav'
 })
 
 if CLIENT then

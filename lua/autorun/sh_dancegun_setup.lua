@@ -57,15 +57,15 @@ end
 
 -- registering songs
 hook.Add('OnGamemodeLoaded', 'ttt2_dancegun_register_songs', function()
-    DANCEGUN:RegisterSong('russian', 'songs/russian.mp3')
-    DANCEGUN:RegisterSong('dug_dance', 'songs/dug_dance.mp3')
-    DANCEGUN:RegisterSong('90s_running', 'songs/90s_running.mp3')
-    DANCEGUN:RegisterSong('beverly_hills', 'songs/beverly_hills.mp3')
-    DANCEGUN:RegisterSong('hey_yeah', 'songs/hey_yeah.mp3')
-    DANCEGUN:RegisterSong('horse', 'songs/horse.mp3')
-    DANCEGUN:RegisterSong('spongebob', 'songs/spongebob.mp3')
-    DANCEGUN:RegisterSong('epic_sax', 'songs/epic_sax.mp3')
-    DANCEGUN:RegisterSong('number_one', 'songs/number_one.mp3')
+    DANCEGUN:RegisterSong('russian', 'songs/russian.wav')
+    DANCEGUN:RegisterSong('dug_dance', 'songs/dug_dance.wav')
+    DANCEGUN:RegisterSong('90s_running', 'songs/90s_running.wav')
+    DANCEGUN:RegisterSong('beverly_hills', 'songs/beverly_hills.wav')
+    DANCEGUN:RegisterSong('hey_yeah', 'songs/hey_yeah.wav')
+    DANCEGUN:RegisterSong('horse', 'songs/horse.wav')
+    DANCEGUN:RegisterSong('spongebob', 'songs/spongebob.wav')
+    DANCEGUN:RegisterSong('epic_sax', 'songs/epic_sax.wav')
+    DANCEGUN:RegisterSong('number_one', 'songs/number_one.wav')
 
     -- use this hook to add further songs
     hook.Run('TTT2DanceGunAddSongs')
