@@ -6,7 +6,13 @@ if SERVER then
     resource.AddFile('materials/vgui/ttt/icon_dancegun')
     resource.AddFile('materials/vgui/ttt/dance_overlay')
     resource.AddFile('materials/vgui/ttt/hud_icon_dancing.png')
+
+    -- add workshop download in attempt to fix syncing problems
+    resource.AddWorkshop('1896240122')
 end
+
+-- create this convar here so that it is available when file is loaded
+local cv_dancegun_ammo = CreateConVar('ttt_dancegun_ammo', 3, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
 
 SWEP.Base = 'weapon_tttbase'
 
@@ -58,8 +64,8 @@ SWEP.Primary.NumShots = 1
 SWEP.Primary.Damage = 0
 SWEP.Primary.Cone = 0.00001
 SWEP.Primary.Ammo = ''
-SWEP.Primary.ClipSize = 1
-SWEP.Primary.DefaultClip = 1
+SWEP.Primary.ClipSize = cv_dancegun_ammo:GetInt()
+SWEP.Primary.DefaultClip = cv_dancegun_ammo:GetInt()
 
 -- some other stuff
 SWEP.IsSilent = false
@@ -100,6 +106,7 @@ if CLIENT then
 
         if not target or not IsValid(target) then return end
         
+        target.current_song = net.ReadString()
         target.dancing = net.ReadBool()
 
         if target.dancing then
@@ -109,9 +116,15 @@ if CLIENT then
             else
                 target:AnimRestartGesture(GESTURE_SLOT_CUSTOM, ACT_GMOD_TAUNT_DANCE, false)
             end
+
+            -- start dance song
+            target:EmitSound(target.current_song, 80)
         else
             -- stop dance animation
             target:AnimResetGestureSlot(GESTURE_SLOT_CUSTOM)
+
+            -- stop dance song
+            target:StopSound(target.current_song)
         end
     end)
 
@@ -192,6 +205,7 @@ if SERVER then
     local function UpdateDancingOnClients(ply)
         net.Start('ttt2_dancegun_dance')
         net.WriteEntity(ply)
+        net.WriteString(ply.current_song)
         net.WriteBool(ply.dancing)
         net.Broadcast()
     end
@@ -202,7 +216,6 @@ if SERVER then
         -- unfreeze player
         ply:Freeze(false)
         ply.dancing = false
-        ply:StopSound(ply.current_song)
         STATUS:RemoveStatus(ply, 'ttt2_dancegun_status')
 
         -- stop the dance - transmit to clients
@@ -215,6 +228,7 @@ if SERVER then
     end
 
     local function StartDancing(ply, attacker)
+        -- do not register shot when player is already dancing
         if ply.dancing then return end
 
         ply.dancing = true
@@ -222,22 +236,21 @@ if SERVER then
         ply.damage_tick = 0
         ply.current_song = DANCEGUN:GetRandomSong()
 
+        -- precalc dancegun parameters based on convars
+        local duration = GetConVar('ttt_dancegun_duration'):GetInt()
+        local damage = GetConVar('ttt_dancegun_damage'):GetInt()
+
+        local tick_damage = damage / duration
+
         -- freeze player
         ply:Freeze(true)
-        ply:EmitSound(ply.current_song, 80)
-        STATUS:AddStatus(ply, 'ttt2_dancegun_status')
+        STATUS:AddTimedStatus(ply, 'ttt2_dancegun_status', duration, true)
 
         -- let him dance - transmit to clients
         UpdateDancingOnClients(ply)
 
         -- save and remove player loadout
         RemoveLoadout(ply)
-
-        -- precalc dancegun parameters based on convars
-        local duration = GetConVar('ttt_dancegun_duration'):GetInt()
-        local damage = GetConVar('ttt_dancegun_damage'):GetInt()
-
-        local tick_damage = damage / duration
 
         -- start damage timer
         timer.Create(ply.dancing_timer, 1, 0, function()
