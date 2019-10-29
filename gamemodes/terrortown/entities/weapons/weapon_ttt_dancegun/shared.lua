@@ -6,9 +6,6 @@ if SERVER then
     resource.AddFile('materials/vgui/ttt/icon_dancegun')
     resource.AddFile('materials/vgui/ttt/dance_overlay')
     resource.AddFile('materials/vgui/ttt/hud_icon_dancing.png')
-
-    -- add workshop download in attempt to fix syncing problems
-    resource.AddWorkshop('1896240122')
 end
 
 -- create this convar here so that it is available when file is loaded
@@ -50,7 +47,7 @@ if CLIENT then
     SWEP.Category = 'Deagle'
     SWEP.Icon = 'vgui/ttt/icon_dancegun'
     SWEP.EquipMenuData = {
-        type = 'Weapon',
+        type = 'item_weapon',
         name = 'ttt2_weapon_dancegun',
         desc = 'ttt2_weapon_dancegun_desc'
     }
@@ -118,7 +115,7 @@ if CLIENT then
             end
 
             -- start dance song
-            target:EmitSound(target.current_song, 80)
+            target:EmitSound(target.current_song, 130)
         else
             -- stop dance animation
             target:AnimResetGestureSlot(GESTURE_SLOT_CUSTOM)
@@ -222,7 +219,9 @@ if SERVER then
         UpdateDancingOnClients(ply)
 
         -- give loadout back
-        GiveLoadout(ply)
+        if GetRoundState() ~= ROUND_PREP then
+            GiveLoadout(ply)
+        end
 
         timer.Stop(ply.dancing_timer)
     end
