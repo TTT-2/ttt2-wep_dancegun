@@ -31,16 +31,6 @@ sound.Add({
 })
 
 if CLIENT then
-	hook.Add("Initialize", "ttt2_dancegun_init_language", function()
-		LANG.AddToLanguage("English", "ttt2_weapon_dancegun", "Dancegun")
-		LANG.AddToLanguage("Deutsch", "ttt2_weapon_dancegun", "Tanzpistole")
-		LANG.AddToLanguage("Русский", "ttt2_weapon_dancegun", "Танцепушка")
-
-		LANG.AddToLanguage("English", "ttt2_weapon_dancegun_desc", "Shoot a player to let him dance.")
-		LANG.AddToLanguage("Deutsch", "ttt2_weapon_dancegun_desc", "Schieße auf einen Spieler, um ihn tanzen zu lassen.")
-		LANG.AddToLanguage("Русский", "ttt2_weapon_dancegun_desc", "Стреляйте в игрока, чтобы он танцевал.")
-	end)
-
 	SWEP.Author = "Mineotopia"
 
 	SWEP.ViewModelFOV = 54
