@@ -200,7 +200,7 @@ if SERVER then
 	end
 
 	local function EndDancing(ply)
-		if not ply or not IsValid(ply) then return end
+		if not IsValid(ply) then return end
 
 		-- unfreeze player
 		ply:Freeze(false)
@@ -245,8 +245,7 @@ if SERVER then
 
 		-- start damage timer
 		timer.Create(ply.dancing_timer, 1, 0, function()
-			if not ply or not IsValid(ply) then return end
-			if not attacker or not IsValid(attacker) then return end
+			if not IsValid(ply) or not IsValid(attacker) then return end
 
 			-- create damage
 			InstantDamage(ply, tick_damage, attacker, ents.Create("weapon_ttt_dancegun"))
@@ -269,7 +268,8 @@ if SERVER then
 	-- handle hit with dancegun
 	hook.Add("ScalePlayerDamage", "ttt2_dancegun_hit_reg", function(ply, hitgroup, dmginfo)
 		local attacker = dmginfo:GetAttacker()
-		if not attacker or not IsValid(attacker) or not attacker:IsPlayer() or not IsValid(attacker:GetActiveWeapon()) then return end
+
+		if not IsValid(attacker) or not attacker:IsPlayer() or not IsValid(attacker:GetActiveWeapon()) then return end
 
 		local wep = attacker:GetActiveWeapon()
 
@@ -285,7 +285,7 @@ if SERVER then
 
 	-- handle no damage for dancing players
 	hook.Add("ScalePlayerDamage", "ttt2_dancegun_dance_handler", function(ply, hitgroup, dmginfo)
-		if not ply or not IsValid(ply) or not ply:IsPlayer() then return end
+		if IsValid(ply) or not ply:IsPlayer() then return end
 
 		if not ply.dancing then return end
 
@@ -296,7 +296,7 @@ if SERVER then
 
 	-- handle death of dancing player
 	hook.Add("PlayerDeath", "ttt2_dancegun_player_death", function(ply)
-		if not ply or not IsValid(ply) or not ply:IsPlayer() then return end
+		if not IsValid(ply) or not ply:IsPlayer() then return end
 
 		if not ply.dancing then return end
 
@@ -304,17 +304,21 @@ if SERVER then
 	end)
 
 	-- stop dancing on round end
-	hook.Add("TTTPrepareRound", "ttt2_dancegun_prepare_round", function(ply)
-		for _, p in ipairs(player.GetAll()) do
-			if p.dancing then
-				EndDancing(p)
-			end
+	hook.Add("TTTPrepareRound", "ttt2_dancegun_prepare_round", function()
+		local plys = player.GetAll()
+
+		for i = 1, #plys do
+			local ply = plys[i]
+
+			if not ply.dancing then continue end
+
+			EndDancing(ply)
 		end
 	end)
 
 	-- dancing players should not be able to pick up weapons
 	hook.Add("PlayerCanPickupWeapon", "ttt2_dancegun_no_pickup_while_dancing", function(ply, wep)
-		if not ply or not IsValid(ply) then return end
+		if not IsValid(ply) then return end
 
 		if ply.dancing then
 			return false
