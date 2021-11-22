@@ -225,13 +225,12 @@ if SERVER then
 		ply.dancing = true
 		ply.dancing_timer = "ttt2_dancegun_timer_" .. tostring(CurTime())
 		ply.damage_tick = 0
+		ply.damage_took = 0
 		ply.current_song = DANCEGUN:GetRandomSong()
 
 		-- precalc dancegun parameters based on convars
 		local duration = GetConVar("ttt_dancegun_duration"):GetInt()
 		local damage = GetConVar("ttt_dancegun_damage"):GetInt()
-
-		local tick_damage = damage / duration
 
 		-- freeze player
 		ply:Freeze(true)
@@ -245,7 +244,13 @@ if SERVER then
 
 		-- start damage timer
 		timer.Create(ply.dancing_timer, 1, 0, function()
-			if not IsValid(ply) or not IsValid(attacker) then return end
+			if not IsValid(ply) then return end
+
+			ply.damage_tick = ply.damage_tick + 1
+
+			local tick_damage = math.Round(damage / duration * ply.damage_tick, 0) - ply.damage_took
+
+			ply.damage_took = ply.damage_took + tick_damage
 
 			-- create damage
 			InstantDamage(ply, tick_damage, attacker, ents.Create("weapon_ttt_dancegun"))
@@ -256,8 +261,6 @@ if SERVER then
 				(math.random() * 60) - 20,
 				(math.random() * 40) - 10
 			))
-
-			ply.damage_tick = ply.damage_tick + 1
 
 			if ply.damage_tick == duration then
 				EndDancing(ply)
