@@ -128,52 +128,6 @@ end
 if SERVER then
 	util.AddNetworkString("ttt2_dancegun_dance")
 
-	-- this function removes the loadout of a player
-	-- while also storing all information for a later use
-	-- credit: Alf21
-	local function RemoveLoadout(ply)
-		ply.savedDancegunInventoryItems = table.Copy(ply:GetEquipmentItems())
-
-		-- reset inventory
-		ply.savedDancegunInventory = {}
-
-		-- save inventory
-		for _, v in pairs(ply:GetWeapons()) do
-			ply.savedDancegunInventory[#ply.savedDancegunInventory + 1] = {cls = WEPS.GetClass(v), clip1 = v:Clip1(), clip2 = v:Clip2()}
-		end
-
-		ply.savedDancegunInventoryWeapon = WEPS.GetClass(ply:GetActiveWeapon())
-
-		-- clear inventory
-		ply:StripWeapons()
-	end
-
-	-- this function returns the loadout of a player
-	-- which was previously stored
-	-- credit: Alf21
-	local function GiveLoadout(ply)
-		if ply.savedDancegunInventory then
-			for _, tbl in ipairs(ply.savedDancegunInventory) do
-				if tbl.cls then
-					local wep = ply:Give(tbl.cls)
-
-					if IsValid(wep) then
-						wep:SetClip1(tbl.clip1 or 0)
-						wep:SetClip2(tbl.clip2 or 0)
-					end
-				end
-			end
-		end
-
-		if ply.savedDancegunInventoryWeapon then
-			ply:SelectWeapon(ply.savedDancegunInventoryWeapon)
-		end
-
-		-- reset inventory
-		ply.savedDancegunInventory = nil
-		ply.savedDancegunInventoryItems = nil
-	end
-
 	local function InstantDamage(ply, damage, attacker, inflictor)
 		local dmg = DamageInfo()
 
@@ -212,7 +166,7 @@ if SERVER then
 
 		-- give loadout back
 		if GetRoundState() ~= ROUND_PREP then
-			GiveLoadout(ply)
+			ply:RestoreCachedWeapons()
 		end
 
 		timer.Stop(ply.dancing_timer)
@@ -240,7 +194,7 @@ if SERVER then
 		UpdateDancingOnClients(ply)
 
 		-- save and remove player loadout
-		RemoveLoadout(ply)
+		ply:CacheAndStripWeapons()
 
 		-- start damage timer
 		timer.Create(ply.dancing_timer, 1, 0, function()
@@ -283,6 +237,7 @@ if SERVER then
 
 		-- remove damage
 		dmginfo:SetDamage(0)
+
 		return true
 	end)
 
@@ -316,15 +271,6 @@ if SERVER then
 			if not ply.dancing then continue end
 
 			EndDancing(ply)
-		end
-	end)
-
-	-- dancing players should not be able to pick up weapons
-	hook.Add("PlayerCanPickupWeapon", "ttt2_dancegun_no_pickup_while_dancing", function(ply, wep)
-		if not IsValid(ply) then return end
-
-		if ply.dancing then
-			return false
 		end
 	end)
 end
