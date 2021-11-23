@@ -27,7 +27,7 @@ sound.Add({
 	channel = CHAN_STATIC,
 	volume = 1.0,
 	level = 130,
-	sound = "scythe.wav"
+	sound = "terrortown/dancegun/scythe.wav"
 })
 
 if CLIENT then
@@ -180,7 +180,7 @@ if SERVER then
 		ply.dancing_timer = "ttt2_dancegun_timer_" .. tostring(CurTime())
 		ply.damage_tick = 0
 		ply.damage_took = 0
-		ply.current_song = DANCEGUN:GetRandomSong()
+		ply.current_song = dancegun.GetRandomSong()
 
 		-- precalc dancegun parameters based on convars
 		local duration = GetConVar("ttt_dancegun_duration"):GetInt()
@@ -273,4 +273,51 @@ if SERVER then
 			EndDancing(ply)
 		end
 	end)
+end
+
+-- MENU STUFF
+if CLIENT then
+	function SWEP:AddToSettingsMenu(parent)
+		local form = vgui.CreateTTT2Form(parent, "header_equipment_additional")
+
+		form:MakeSlider({
+			convar = "ttt_dancegun_duration",
+			label = "label_dancegun_duration",
+			min = 0,
+			max = 60,
+			decimal = 0
+		})
+
+		form:MakeSlider({
+			convar = "ttt_dancegun_damage",
+			label = "label_dancegun_damage",
+			min = 0,
+			max = 200,
+			decimal = 0
+		})
+
+		form:MakeSlider({
+			convar = "ttt_dancegun_ammo",
+			label = "label_dancegun_ammo",
+			min = 0,
+			max = 10,
+			decimal = 0
+		})
+
+		local form2 = vgui.CreateTTT2Form(parent, "header_equipment_dancegun_songs")
+
+		form2:MakeHelp({
+			label = "help_dancegun_songs"
+		})
+
+		for i = 1, #dancegun.songs do
+			local songName = dancegun.songs[i]
+
+			form2:MakeCheckBox({
+				convar = "ttt_dancegun_song_" .. songName .. "_enable",
+				label = "label_dancegun_song_enable",
+				params = {song = songName}
+			})
+		end
+	end
 end
