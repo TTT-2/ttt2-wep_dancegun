@@ -3,10 +3,6 @@ dancegun = {}
 dancegun.songs = {}
 
 if SERVER then
-	-- dancegun CONVARS
-	CreateConVar("ttt_dancegun_duration", 20, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
-	CreateConVar("ttt_dancegun_damage", 55, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
-
 	function dancegun.GetRandomSong()
 		local enabledSongs = {}
 

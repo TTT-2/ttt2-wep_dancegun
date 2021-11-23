@@ -9,7 +9,9 @@ if SERVER then
 end
 
 -- create this convar here so that it is available when file is loaded
-local cv_dancegun_ammo = CreateConVar("ttt_dancegun_ammo", 3, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
+local cvDancegunAmmo = CreateConVar("ttt_dancegun_ammo", 3, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
+local cvDancegunDuration = CreateConVar("ttt_dancegun_duration", 20, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
+local cvDancegunDamage = CreateConVar("ttt_dancegun_damage", 55, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
 
 SWEP.Base = "weapon_tttbase"
 
@@ -53,8 +55,8 @@ SWEP.Primary.NumShots = 1
 SWEP.Primary.Damage = 0
 SWEP.Primary.Cone = 0.00001
 SWEP.Primary.Ammo = ""
-SWEP.Primary.ClipSize = cv_dancegun_ammo:GetInt()
-SWEP.Primary.DefaultClip = cv_dancegun_ammo:GetInt()
+SWEP.Primary.ClipSize = cvDancegunAmmo:GetInt()
+SWEP.Primary.DefaultClip = cvDancegunAmmo:GetInt()
 
 -- some other stuff
 SWEP.IsSilent = false
@@ -183,8 +185,8 @@ if SERVER then
 		ply.current_song = dancegun.GetRandomSong()
 
 		-- precalc dancegun parameters based on convars
-		local duration = GetConVar("ttt_dancegun_duration"):GetInt()
-		local damage = GetConVar("ttt_dancegun_damage"):GetInt()
+		local duration = cvDancegunDuration:GetInt()
+		local damage = cvDancegunDamage:GetInt()
 
 		-- freeze player
 		ply:Freeze(true)
