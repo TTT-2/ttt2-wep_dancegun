@@ -8,10 +8,7 @@ if SERVER then
 	resource.AddFile("materials/vgui/ttt/hud_icon_dancing.png")
 end
 
--- create this convar here so that it is available when file is loaded
-local cvDancegunAmmo = CreateConVar("ttt_dancegun_ammo", 3, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
-local cvDancegunDuration = CreateConVar("ttt_dancegun_duration", 20, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
-local cvDancegunDamage = CreateConVar("ttt_dancegun_damage", 55, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
+local cvDancegunAmmo = CreateConVar("ttt_dancegun_ammo", "3", {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED})
 
 SWEP.Base = "weapon_tttbase"
 
@@ -88,10 +85,8 @@ if CLIENT then
 			type = "bad"
 		})
 	end)
-end
 
---- HANDLE WEAPON ACTION ---
-if CLIENT then
+	--- HANDLE WEAPON ACTION ---
 	net.Receive("ttt2_dancegun_dance", function()
 		local target = net.ReadEntity()
 
@@ -128,6 +123,9 @@ if CLIENT then
 end
 
 if SERVER then
+	local cvDancegunDuration = CreateConVar("ttt_dancegun_duration", "20", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+	local cvDancegunDamage = CreateConVar("ttt_dancegun_damage", "55", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+
 	util.AddNetworkString("ttt2_dancegun_dance")
 
 	local function InstantDamage(ply, damage, attacker, inflictor)
@@ -283,7 +281,7 @@ if CLIENT then
 		local form = vgui.CreateTTT2Form(parent, "header_equipment_additional")
 
 		form:MakeSlider({
-			convar = "ttt_dancegun_duration",
+			serverConvar = "ttt_dancegun_duration",
 			label = "label_dancegun_duration",
 			min = 0,
 			max = 60,
@@ -291,7 +289,7 @@ if CLIENT then
 		})
 
 		form:MakeSlider({
-			convar = "ttt_dancegun_damage",
+			serverConvar = "ttt_dancegun_damage",
 			label = "label_dancegun_damage",
 			min = 0,
 			max = 200,
@@ -299,7 +297,7 @@ if CLIENT then
 		})
 
 		form:MakeSlider({
-			convar = "ttt_dancegun_ammo",
+			serverConvar = "ttt_dancegun_ammo",
 			label = "label_dancegun_ammo",
 			min = 0,
 			max = 10,
@@ -316,7 +314,7 @@ if CLIENT then
 			local songName = dancegun.songs[i]
 
 			form2:MakeCheckBox({
-				convar = "ttt_dancegun_song_" .. songName .. "_enable",
+				serverConvar = "ttt_dancegun_song_" .. songName .. "_enable",
 				label = "label_dancegun_song_enable",
 				params = {song = songName}
 			})

@@ -39,7 +39,9 @@ function dancegun.OnLoaded()
 end
 
 function dancegun.RegisterSong(song_id, song_path)
-	CreateConVar("ttt_dancegun_song_" .. song_id .. "_enable", 1, {FCVAR_NOTIFY, FCVAR_ARCHIVE})
+	if SERVER then
+		CreateConVar("ttt_dancegun_song_" .. song_id .. "_enable", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+	end
 
 	dancegun.songs[#dancegun.songs + 1] = song_id
 
