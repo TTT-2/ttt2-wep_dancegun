@@ -70,10 +70,7 @@ SWEP.Primary.Sound = Sound("Weapon_Deagle.Reaper")
 
 -- modify default weapon clip
 function SWEP:Initialize()
-	local clip = math.max(0, GetConVar("ttt_dancegun_ammo"):GetInt())
-
-	self:SetClip1(clip)
-
+	self:SetClip1(math.max(0, cvDancegunAmmo:GetInt()))
 	self.BaseClass.Initialize(self)
 end
 
